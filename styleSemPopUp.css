@@ -1,0 +1,8 @@
+	body {
+		/*background-color: red;*/
+		background-image: url("images/logo150px.png");
+		background-repeat: no-repeat;
+		background-attachment: fixed;
+		background-position: 98% 98%;
+		/* background-size: 150px; */
+	}

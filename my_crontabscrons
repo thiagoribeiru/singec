@@ -1,0 +1,2 @@
+00,30 * * * * php -q /home/ubuntu/workspace/tarefasCronn.php
+00,30 * * * * php -q /home/ubuntu/workspace/tarefasCron.php
