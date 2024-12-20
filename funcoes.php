@@ -110,34 +110,108 @@ function mask($val, $mask) {
 }
 
 //função para pegar cotação de moedas
-function cota($moeda) { // Inicia a funcao para pegar a cotacao de determinada moeda ($moeda)
-	$link = "http://download.finance.yahoo.com/d/quotes.csv?s=".$moeda."USD=X&f=sl1d1t1ba&e=.csv"; //link para pegar a cotacao no formato CSv
-	if (@fopen($link,"r")) { // abre o arquivo CSV
-		$arq = file($link);
-	}
-	if (is_array($arq)) { // Se o arquivo retornar um array continua
-	   for ($x=0;$x<count($arq);$x++) { // Passa por todas as chaves do array
-		  $linha = explode(",",$arq[$x]); // Separa os valores do arquivo CSV
+// function cota($moeda) { // Inicia a funcao para pegar a cotacao de determinada moeda ($moeda)
+// 	$link = "http://download.finance.yahoo.com/d/quotes.csv?s=".$moeda."USD=X&f=sl1d1t1ba&e=.csv"; //link para pegar a cotacao no formato CSv
+// 	if (@fopen($link,"r")) { // abre o arquivo CSV
+// 		$arq = file($link);
+// 	}
+// 	if (is_array($arq)) { // Se o arquivo retornar um array continua
+// 	   for ($x=0;$x<count($arq);$x++) { // Passa por todas as chaves do array
+// 		  $linha = explode(",",$arq[$x]); // Separa os valores do arquivo CSV
 		  
-		  $result['cotacao']  = $linha[1]; // Pega o valor que o Yahoo usa para fazer a conversao
-		  $data = date("Y-m-d",strtotime(str_replace('"','',$linha[2]))); // Retira as aspas da data
-		  $hora = date("H:i:s",strtotime(str_replace('"','',$linha[3]))); // Retira as aspas do horario da cotacao
-		  $result['datetime'] = $data." ".$hora;
-		  $result['compra']  = $linha[4]; // Pega o valor de compra da moeda
-		  $result['venda']  = $linha[5]; // Pega o valor de venda da moeda
-		}
-	}
-	else{ // Se o arquivo nao retornar nenhum array
-		$result['cotacao'] = "N/A"; // Define not avaiable para os campos
-		// $result['data'] = "N/A";
-		// $result['hora'] = "N/A";
-		$result['datetime'] = "N/A";
-		$result['compra']  = "N/A";
-		$result['venda']  = "N/A";
-	}
+// 		  $result['cotacao']  = $linha[1]; // Pega o valor que o Yahoo usa para fazer a conversao
+// 		  $data = date("Y-m-d",strtotime(str_replace('"','',$linha[2]))); // Retira as aspas da data
+// 		  $hora = date("H:i:s",strtotime(str_replace('"','',$linha[3]))); // Retira as aspas do horario da cotacao
+// 		  $result['datetime'] = $data." ".$hora;
+// 		  $result['compra']  = $linha[4]; // Pega o valor de compra da moeda
+// 		  $result['venda']  = $linha[5]; // Pega o valor de venda da moeda
+// 		}
+// 	}
+// 	else{ // Se o arquivo nao retornar nenhum array
+// 		$result['cotacao'] = "N/A"; // Define not avaiable para os campos
+// 		// $result['data'] = "N/A";
+// 		// $result['hora'] = "N/A";
+// 		$result['datetime'] = "N/A";
+// 		$result['compra']  = "N/A";
+// 		$result['venda']  = "N/A";
+// 	}
 	
-	return $result; // retorna o array com os valores a serem usados
+// 	return $result; // retorna o array com os valores a serem usados
+// }
+function cota($moeda) {
+    // URL do feed do ECB
+    $url = "https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml";
+
+    // Faz a requisição ao feed XML
+    $xml = @simplexml_load_file($url);
+
+    if ($xml === false) {
+        // Retorna erro caso o feed não esteja acessível
+        return [
+            'cotacao' => 'N/A',
+            'datetime' => 'N/A',
+            'compra' => 'N/A',
+            'venda' => 'N/A',
+        ];
+    }
+
+    // Obtém a data do feed
+    $data = (string)$xml->Cube->Cube['time'];
+
+    // Procura a taxa de câmbio da moeda desejada
+    $cotacao = null;
+    foreach ($xml->Cube->Cube->Cube as $rate) {
+        if ((string)$rate['currency'] === strtoupper($moeda)) {
+            $cotacao = (float)$rate['rate'];
+            break;
+        }
+    }
+
+    // Verifica se a moeda foi encontrada
+    if ($cotacao === null) {
+        return [
+            'cotacao' => 'N/A',
+            'datetime' => 'N/A',
+            'compra' => 'N/A',
+            'venda' => 'N/A',
+        ];
+    }
+
+    // Calcula a cotação com base no USD se necessário
+    // Taxa do USD em relação ao EUR
+    $usdToEur = null;
+    foreach ($xml->Cube->Cube->Cube as $rate) {
+        if ((string)$rate['currency'] === "USD") {
+            $usdToEur = (float)$rate['rate'];
+            break;
+        }
+    }
+
+    if ($usdToEur === null) {
+        return [
+            'cotacao' => 'N/A',
+            'datetime' => 'N/A',
+            'compra' => 'N/A',
+            'venda' => 'N/A',
+        ];
+    }
+
+    // Converte a cotação para USD
+    $cotacaoEmUsd = $cotacao / $usdToEur;
+
+    return [
+        'cotacao' => round($cotacaoEmUsd, 4),
+        'datetime' => $data,
+        'compra' => round($cotacaoEmUsd, 4),
+        'venda' => round($cotacaoEmUsd, 4),
+    ];
 }
+
+// Exemplo de uso
+// $moeda = "BRL"; // Substitua pela moeda desejada
+// $resultado = cota($moeda);
+// print_r($resultado);
+
 //ultima cotação
 function forcaCotaServ(){
 	global $sql;

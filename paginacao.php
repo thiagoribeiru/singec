@@ -2,7 +2,7 @@
 	.pgoff {font-family: Verdana, Arial, Helvetica; font-size: 11px; color: #FF0000; text-decoration: none}a.pg {font-family: Verdana, Arial, Helvetica; font-size: 11px; color: #003366; text-decoration: none}a:hover.pg {font-family: Verdana, Arial, Helvetica; font-size: 11px; color: #0066cc; text-decoration:underline}
 </style>
 <?php
-	$buscapp = urlencode($busca);
+	$buscapp = isset($busca) ? urlencode($busca) : "";
 	$quant_pg = ceil($quantreg/$numreg);
 	$quant_pg++;
 	//controle de data se houver

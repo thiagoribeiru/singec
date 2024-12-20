@@ -199,7 +199,7 @@ function verificaManutencao() {
 	global $sql;
 	global $manuVar;
 	if (!isset($_SESSION)) session_start();
-	if (isset($_SESSION) and $_SESSION['UsuarioEmpresa']!='' and count(explode('logout.php',$_SERVER['REQUEST_URI']))<=1) {
+	if (isset($_SESSION) and isset($_SESSION['UsuarioEmpresa']) and $_SESSION['UsuarioEmpresa']!='' and count(explode('logout.php',$_SERVER['REQUEST_URI']))<=1) {
 		$nomeEmpresa = $_SESSION['UsuarioEmpresaNome'];
 		$manutencao_pesq = $sql->query("select * from manutencao") or die (mysqli_error($sql));
 		$manutencao = mysqli_fetch_array($manutencao_pesq);

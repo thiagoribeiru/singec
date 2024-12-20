@@ -43,7 +43,8 @@ echo "<table><tr><td>";
 		$quantreg = mysqli_num_rows($sql_conta);
 		//lista
 		$listMp = $sql->query($stringPesquisa." limit $inicial, $numreg");
-		$linhasMp = /*mysqli_num_rows($listMp)*/$numreg;
+		// $linhasMp = /*mysqli_num_rows($listMp)*/$numreg;
+		$linhasMp = mysqli_num_rows($listMp)<$numreg ? mysqli_num_rows($listMp) : $numreg;
 		for ($i=0;$i<$linhasMp;$i++) {
 			$linha = mysqli_fetch_array($listMp);
 			echo "<tr>\n";

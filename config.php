@@ -20,8 +20,8 @@ if (dominio("singec.com.br")) {
 	$displayError = false;
 } else if (dominio("localhost")) {
     $servername = 'localhost';
-    $username = 'bd_singec';
-    $password = 'singec123';
+    $username = 'singecdbuser';
+    $password = 'S3gur4nc@';
     $database = 'singec';
     $dbport = 3306;
     $tempoOcioso = 60*60;
